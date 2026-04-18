@@ -36,30 +36,32 @@ export default function PlayerBar({ onSeek }: PlayerBarProps) {
     toggleMute,
   } = usePlayerStore();
 
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  const userId = isGuest ? null : user?.id || null;
   const [liked, setLiked] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const volumeRef = useRef<HTMLDivElement>(null);
 
   // Check if current song is liked
   useEffect(() => {
-    if (!user || !currentSong) { setLiked(false); return; }
-    isSongLiked(user.id, currentSong.id).then(setLiked).catch(() => setLiked(false));
-  }, [user, currentSong?.id]);
+    if (!currentSong) { setLiked(false); return; }
+    if (!userId && !isGuest) { setLiked(false); return; }
+    isSongLiked(userId, currentSong.id).then(setLiked).catch(() => setLiked(false));
+  }, [userId, isGuest, currentSong?.id]);
 
   // Track recently played when song changes
   useEffect(() => {
-    if (!user || !currentSong) return;
-    trackRecentlyPlayed(user.id, currentSong).catch(() => {});
-  }, [user, currentSong?.id]);
+    if (!currentSong) return;
+    trackRecentlyPlayed(userId, currentSong).catch(() => {});
+  }, [userId, currentSong?.id]);
 
   const handleLikeToggle = async () => {
-    if (!user || !currentSong) return;
+    if (!currentSong) return;
     if (liked) {
-      await unlikeSong(user.id, currentSong.id);
+      await unlikeSong(userId, currentSong.id);
       setLiked(false);
     } else {
-      await likeSong(user.id, currentSong);
+      await likeSong(userId, currentSong);
       setLiked(true);
     }
   };
@@ -83,28 +85,14 @@ export default function PlayerBar({ onSeek }: PlayerBarProps) {
 
   return (
     <motion.div
-      initial={{ y: 100 }}
+      initial={{ y: 150 }}
       animate={{ y: 0 }}
-      className="fixed bottom-0 left-0 right-0 z-50 bg-black/70 backdrop-blur-xl border-t border-white/5"
+      transition={{ type: "spring", stiffness: 200, damping: 25 }}
+      className="fixed bottom-0 left-0 right-0 z-50 p-4"
     >
-      {/* Progress bar */}
-      <div
-        ref={progressRef}
-        onClick={handleProgressClick}
-        className="w-full h-1 bg-white/5 cursor-pointer group hover:h-2 transition-all relative"
-      >
-        <div
-          className="absolute top-0 left-0 h-full bg-gradient-to-r from-primary to-rose-400"
-          style={{ width: `${progress}%` }}
-        />
-        <div
-          className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-white shadow-neon opacity-0 group-hover:opacity-100 transition-opacity"
-          style={{ left: `calc(${progress}% - 7px)` }}
-        />
-      </div>
-
-      <div className="flex items-center justify-between px-4 py-2.5 max-w-screen-2xl mx-auto">
-        {/* Song Info + Like */}
+      <div className="max-w-screen-2xl mx-auto rounded-2xl bg-[#111]/80 backdrop-blur-2xl border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] px-4 py-3 flex items-center justify-between">
+        
+        {/* Left: Song Info */}
         <div className="flex items-center gap-3 w-[30%] min-w-0">
           {currentSong ? (
             <>
@@ -119,8 +107,7 @@ export default function PlayerBar({ onSeek }: PlayerBarProps) {
                 <p className="text-sm font-medium text-white truncate">{currentSong.title}</p>
                 <p className="text-xs text-white/50 truncate">{currentSong.artist}</p>
               </div>
-              {user && (
-                <button
+              <button
                   onClick={handleLikeToggle}
                   className={cn(
                     "flex-shrink-0 transition-colors",
@@ -130,7 +117,6 @@ export default function PlayerBar({ onSeek }: PlayerBarProps) {
                 >
                   <Heart className="w-4 h-4" fill={liked ? 'currentColor' : 'none'} />
                 </button>
-              )}
             </>
           ) : (
             <div className="flex items-center gap-3 text-white/30">
@@ -142,25 +128,20 @@ export default function PlayerBar({ onSeek }: PlayerBarProps) {
           )}
         </div>
 
-        {/* Playback Controls */}
-        <div className="flex flex-col items-center gap-0.5 w-[40%]">
-          <div className="flex items-center gap-5">
+        {/* Center: Controls & Progress */}
+        <div className="flex-1 flex flex-col items-center justify-center max-w-2xl px-6">
+          <div className="flex items-center gap-6 mb-1">
             <button
+              className="text-white/40 hover:text-white transition-colors"
               onClick={playPrev}
-              className="text-white/50 hover:text-white transition-colors"
             >
               <SkipBack className="w-5 h-5" fill="currentColor" />
             </button>
 
             <button
+              className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_15px_rgba(255,255,255,0.2)]"
               onClick={togglePlay}
               disabled={!currentSong}
-              className={cn(
-                "w-10 h-10 rounded-full flex items-center justify-center transition-all",
-                currentSong
-                  ? "bg-white text-black hover:scale-105 hover:shadow-[0_0_20px_rgba(255,255,255,0.3)]"
-                  : "bg-white/20 text-white/40 cursor-not-allowed"
-              )}
             >
               {isLoading ? (
                 <Loader2 className="w-5 h-5 animate-spin" />
@@ -172,33 +153,65 @@ export default function PlayerBar({ onSeek }: PlayerBarProps) {
             </button>
 
             <button
+              className="text-white/40 hover:text-white transition-colors"
               onClick={playNext}
-              className="text-white/50 hover:text-white transition-colors"
             >
               <SkipForward className="w-5 h-5" fill="currentColor" />
             </button>
           </div>
-          <div className="flex items-center gap-2 text-[11px] text-white/30 tabular-nums">
-            <span>{formatTime(currentTime)}</span>
-            <span>/</span>
-            <span>{formatTime(duration)}</span>
+
+          <div className="w-full flex items-center gap-3">
+            <span className="text-[10px] text-white/30 tabular-nums w-8 text-right">
+              {formatTime(currentTime)}
+            </span>
+            <div
+              ref={progressRef}
+              onClick={handleProgressClick}
+              className="flex-1 h-1.5 bg-white/10 rounded-full cursor-pointer group hover:h-2 transition-all relative"
+            >
+              <div
+                className="absolute top-0 left-0 h-full bg-white rounded-full group-hover:bg-primary transition-colors"
+                style={{ width: `${progress}%` }}
+              />
+              <div
+                className="absolute top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white shadow opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ left: `calc(${progress}% - 6px)` }}
+              />
+            </div>
+            <span className="text-[10px] text-white/30 tabular-nums w-8">
+              {formatTime(duration)}
+            </span>
           </div>
         </div>
 
-        {/* Volume */}
-        <div className="flex items-center justify-end gap-2 w-[30%]">
-          <button onClick={toggleMute} className="text-white/50 hover:text-white transition-colors">
-            <VolumeIcon className="w-5 h-5" />
-          </button>
-          <div
-            ref={volumeRef}
-            onClick={handleVolumeClick}
-            className="w-24 h-1.5 bg-white/10 rounded-full cursor-pointer group relative"
-          >
+        {/* Right: Actions & Volume */}
+        <div className="flex items-center justify-end gap-5 w-[30%] min-w-0">
+          {currentSong && (
+            <button
+              onClick={handleLikeToggle}
+              className={cn(
+                "flex-shrink-0 transition-colors p-2 rounded-full hover:bg-white/5",
+                liked ? "text-primary" : "text-white/30 hover:text-white"
+              )}
+              title={liked ? 'Unlike' : 'Like'}
+            >
+              <Heart className="w-[18px] h-[18px]" fill={liked ? 'currentColor' : 'none'} />
+            </button>
+          )}
+          <div className="flex items-center gap-2 group w-28">
+            <button onClick={toggleMute} className="text-white/40 hover:text-white transition-colors">
+              <VolumeIcon className="w-[18px] h-[18px]" />
+            </button>
             <div
-              className="h-full bg-white/50 rounded-full transition-all group-hover:bg-white/70"
-              style={{ width: `${isMuted ? 0 : volume}%` }}
-            />
+              ref={volumeRef}
+              onClick={handleVolumeClick}
+              className="w-full h-1.5 bg-white/10 rounded-full cursor-pointer relative hidden sm:block"
+            >
+              <div
+                className="absolute top-0 left-0 h-full bg-white rounded-full group-hover:bg-primary transition-colors"
+                style={{ width: `${isMuted ? 0 : volume}%` }}
+              />
+            </div>
           </div>
         </div>
       </div>

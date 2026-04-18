@@ -2,10 +2,12 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from '@/contexts/AuthContext';
 import { useMusicEngine } from '@/hooks/useMusicEngine';
 import Sidebar from '@/components/Sidebar';
+import TopBar from '@/components/TopBar';
 import PlayerBar from '@/components/PlayerBar';
 import Login from '@/pages/Login';
 import Home from '@/pages/Home';
 import SearchPage from '@/pages/Search';
+import LikedSongs from '@/pages/LikedSongs';
 import Playlists from '@/pages/Playlists';
 import Friends from '@/pages/Friends';
 import Rooms from '@/pages/Rooms';
@@ -36,10 +38,13 @@ function MainLayout({ children }: { children: React.ReactNode }) {
   const { seekTo } = useMusicEngine('yt-player');
 
   return (
-    <div className="flex h-screen w-full overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden relative vignette">
       <Sidebar />
-      <div className="flex-1 overflow-hidden">
-        {children}
+      <div className="flex-1 flex flex-col overflow-hidden relative z-10">
+        <TopBar />
+        <div className="flex-1 overflow-hidden">
+          {children}
+        </div>
       </div>
       {/* Hidden YouTube player container */}
       <div id="yt-player" className="fixed -top-[9999px] -left-[9999px]" />
@@ -49,11 +54,29 @@ function MainLayout({ children }: { children: React.ReactNode }) {
 }
 
 function AppRoutes() {
+  // Generate random particles
+  const particles = Array.from({ length: 20 }).map((_, i) => ({
+    width: Math.random() * 4 + 1 + 'px',
+    height: Math.random() * 4 + 1 + 'px',
+    left: Math.random() * 100 + 'vw',
+    top: Math.random() * 100 + 'vh',
+    animationDuration: Math.random() * 10 + 10 + 's',
+    animationDelay: Math.random() * 5 + 's',
+  }));
+
   return (
     <div className="w-full h-screen bg-background relative selection:bg-primary/30 overflow-hidden">
-      {/* Background ambient lighting */}
-      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[150px] opacity-40 pointer-events-none animate-pulse" />
-      <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-500/5 blur-[150px] opacity-40 pointer-events-none animate-pulse" />
+      {/* Background ambient lighting - Mesh Gradient */}
+      <div className="absolute top-[-20%] left-[-10%] w-[60%] h-[60%] rounded-full bg-primary/10 blur-[150px] opacity-60 pointer-events-none animate-pulse mix-blend-screen" style={{ animationDuration: '8s' }} />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-purple-600/10 blur-[150px] opacity-60 pointer-events-none animate-pulse mix-blend-screen" style={{ animationDuration: '12s' }} />
+      <div className="absolute top-[30%] left-[40%] w-[40%] h-[40%] rounded-full bg-cyan-500/5 blur-[120px] opacity-40 pointer-events-none animate-pulse mix-blend-screen" style={{ animationDuration: '10s' }} />
+
+      {/* Floating Particles */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {particles.map((p, i) => (
+          <div key={i} className="particle" style={p} />
+        ))}
+      </div>
 
       <main className="relative z-10 w-full h-full">
         <Routes>
@@ -66,6 +89,7 @@ function AppRoutes() {
                   <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/search" element={<SearchPage />} />
+                    <Route path="/liked" element={<LikedSongs />} />
                     <Route path="/playlists" element={<Playlists />} />
                     <Route path="/friends" element={<Friends />} />
                     <Route path="/rooms" element={<Rooms />} />

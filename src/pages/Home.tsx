@@ -1,198 +1,164 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Play, TrendingUp, Clock, Heart, History } from 'lucide-react';
+import { Play, TrendingUp, Heart, History, Flame, Music2, PartyPopper, Disc3, Sparkles } from 'lucide-react';
 import { usePlayerStore, type Song } from '@/store/playerStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { getLikedSongs, getRecentlyPlayed } from '@/services/musicData';
-
-const FEATURED_SONGS: Song[] = [
-  { id: 'dQw4w9WgXcQ', title: 'Never Gonna Give You Up', artist: 'Rick Astley', thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg', duration: 213 },
-  { id: 'kJQP7kiw5Fk', title: 'Despacito', artist: 'Luis Fonsi ft. Daddy Yankee', thumbnail: 'https://img.youtube.com/vi/kJQP7kiw5Fk/mqdefault.jpg', duration: 282 },
-  { id: 'JGwWNGJdvx8', title: 'Shape of You', artist: 'Ed Sheeran', thumbnail: 'https://img.youtube.com/vi/JGwWNGJdvx8/mqdefault.jpg', duration: 263 },
-  { id: '60ItHLz5WEA', title: 'Faded', artist: 'Alan Walker', thumbnail: 'https://img.youtube.com/vi/60ItHLz5WEA/mqdefault.jpg', duration: 212 },
-  { id: 'RgKAFK5djSk', title: 'See You Again', artist: 'Wiz Khalifa ft. Charlie Puth', thumbnail: 'https://img.youtube.com/vi/RgKAFK5djSk/mqdefault.jpg', duration: 237 },
-  { id: 'YQHsXMglC9A', title: 'Hello', artist: 'Adele', thumbnail: 'https://img.youtube.com/vi/YQHsXMglC9A/mqdefault.jpg', duration: 367 },
-];
-
-const HINDI_SONGS: Song[] = [
-  { id: 'hoNb6HuNmU0', title: 'Tum Hi Ho', artist: 'Arijit Singh', thumbnail: 'https://img.youtube.com/vi/hoNb6HuNmU0/mqdefault.jpg', duration: 261 },
-  { id: 'cYOB941gyXI', title: 'Kesariya', artist: 'Arijit Singh', thumbnail: 'https://img.youtube.com/vi/cYOB941gyXI/mqdefault.jpg', duration: 268 },
-  { id: 'vGJTaP6anOU', title: 'Channa Mereya', artist: 'Arijit Singh', thumbnail: 'https://img.youtube.com/vi/vGJTaP6anOU/mqdefault.jpg', duration: 289 },
-  { id: 'BddP6PYo2gs', title: 'Raataan Lambiyan', artist: 'Jubin Nautiyal', thumbnail: 'https://img.youtube.com/vi/BddP6PYo2gs/mqdefault.jpg', duration: 235 },
-];
-
-const ALL_SONGS = [...FEATURED_SONGS, ...HINDI_SONGS];
+import { HINDI_HITS, PUNJABI_VIBES, BHOJPURI_BEATS, SOUTH_MIX } from '@/lib/indianCuratedData';
+import PremiumSongCard from '@/components/PremiumSongCard';
+import LazySongRow from '@/components/LazySongRow';
 
 const container = {
   hidden: { opacity: 0 },
   show: { opacity: 1, transition: { staggerChildren: 0.05 } },
 };
-const item = {
-  hidden: { opacity: 0, y: 20 },
-  show: { opacity: 1, y: 0 },
-};
 
-function getGreeting(): string {
-  const hour = new Date().getHours();
-  if (hour < 12) return 'Good morning';
-  if (hour < 17) return 'Good afternoon';
-  return 'Good evening';
-}
-
-function SongCard({ song, allSongs }: { song: Song; allSongs: Song[] }) {
+function HorizontalRecentCard({ song, songs, index }: { song: Song; songs: Song[]; index: number }) {
   const setSong = usePlayerStore((s) => s.setSong);
   const setQueue = usePlayerStore((s) => s.setQueue);
 
   return (
     <motion.div
-      variants={item}
-      whileHover={{ scale: 1.03 }}
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ delay: index * 0.05, type: "spring", stiffness: 300, damping: 24 }}
+      whileHover={{ scale: 1.02 }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => {
-        setSong(song);
-        setQueue(allSongs);
-      }}
-      className="group cursor-pointer"
+      onClick={() => { setSong(song); setQueue(songs); }}
+      className="flex-shrink-0 w-64 glass-panel p-3 flex items-center gap-4 cursor-pointer group hover:bg-white/5 transition-colors overflow-hidden relative"
     >
-      <div className="relative rounded-xl overflow-hidden bg-white/5 aspect-square">
-        <img
-          src={song.thumbnail}
-          alt={song.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          loading="lazy"
-        />
+      <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 relative bg-white/5">
+        <img src={song.thumbnail} alt={song.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" loading="lazy" />
         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center shadow-neon">
-            <Play className="w-5 h-5 text-white ml-0.5" fill="currentColor" />
-          </div>
+          <Play className="w-5 h-5 text-white filter drop-shadow-md" fill="currentColor" />
         </div>
       </div>
-      <p className="mt-2 text-sm font-medium text-white/90 truncate">{song.title}</p>
-      <p className="text-xs text-white/40 truncate">{song.artist}</p>
+      <div className="flex-1 min-w-0 z-10">
+        <p className="text-sm font-semibold text-white truncate drop-shadow-sm">{song.title}</p>
+        <p className="text-xs text-white/50 truncate font-medium">{song.artist}</p>
+      </div>
     </motion.div>
   );
 }
 
-function SongRow({ song, songs, index }: { song: Song; songs: Song[]; index: number }) {
-  const setSong = usePlayerStore((s) => s.setSong);
-  const setQueue = usePlayerStore((s) => s.setQueue);
-
+// Reusable Static Row for curated content
+function StaticSongRow({ title, songs, icon, iconBgColor, iconTextColor }: { title: string, songs: Song[], icon?: React.ReactNode, iconBgColor?: string, iconTextColor?: string }) {
+  if (!songs || songs.length === 0) return null;
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -10 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ delay: index * 0.04 }}
-      whileHover={{ x: 4 }}
-      onClick={() => { setSong(song); setQueue(songs); }}
-      className="flex items-center gap-3 p-2 rounded-xl hover:bg-white/5 cursor-pointer transition-colors group"
-    >
-      <div className="w-10 h-10 rounded-lg overflow-hidden flex-shrink-0 bg-white/5">
-        <img src={song.thumbnail} alt={song.title} className="w-full h-full object-cover" loading="lazy" />
+    <div className="mb-10 w-full">
+      <div className="flex items-center justify-between mb-4 px-2">
+        <div className="flex items-center gap-3">
+          {icon && (
+            <div className={`p-2 rounded-xl ${iconBgColor} ${iconTextColor}`}>
+              {icon}
+            </div>
+          )}
+          <h3 className="text-xl font-bold tracking-tight text-white/90">{title}</h3>
+        </div>
+        <button className="text-xs font-semibold text-white/40 hover:text-white transition-colors">SEE ALL</button>
       </div>
-      <div className="flex-1 min-w-0">
-        <p className="text-sm font-medium text-white/90 truncate">{song.title}</p>
-        <p className="text-xs text-white/40 truncate">{song.artist}</p>
-      </div>
-      <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-        <Play className="w-4 h-4 text-primary" fill="currentColor" />
-      </div>
-    </motion.div>
+      <motion.div
+        variants={container}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: true, margin: "100px" }}
+        className="flex space-x-4 overflow-x-auto pb-6 scrollbar-hide snap-x px-2"
+      >
+        {songs.map((song) => (
+          <PremiumSongCard key={song.id} song={song} allSongs={songs} />
+        ))}
+      </motion.div>
+    </div>
   );
 }
 
 export default function Home() {
-  const { user } = useAuth();
+  const { user, isGuest } = useAuth();
+  const userId = isGuest ? null : user?.id || null;
   const [likedSongs, setLikedSongs] = useState<Song[]>([]);
   const [recentSongs, setRecentSongs] = useState<Song[]>([]);
 
   useEffect(() => {
-    if (!user) return;
-    getLikedSongs(user.id).then(setLikedSongs).catch(() => {});
-    getRecentlyPlayed(user.id).then(setRecentSongs).catch(() => {});
-  }, [user]);
+    if (!userId && !isGuest) return;
+    getLikedSongs(userId).then(setLikedSongs).catch(() => {});
+    getRecentlyPlayed(userId).then(setRecentSongs).catch(() => {});
+  }, [userId, isGuest]);
 
   return (
-    <div className="p-6 pb-28 overflow-y-auto h-full space-y-10">
-      {/* Hero */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <h1 className="text-3xl font-bold text-white">{getGreeting()}</h1>
-        <p className="text-white/40 text-sm mt-1">What do you want to listen to?</p>
-      </motion.div>
-
-      {/* Recently Played */}
-      {recentSongs.length > 0 && (
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <History className="w-5 h-5 text-cyan-400" />
-            <h2 className="text-lg font-semibold text-white">Recently Played</h2>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 max-w-2xl">
-            {recentSongs.slice(0, 8).map((song, i) => (
-              <SongRow key={song.id} song={song} songs={recentSongs} index={i} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Liked Songs */}
-      {likedSongs.length > 0 && (
-        <section>
-          <div className="flex items-center gap-2 mb-4">
-            <Heart className="w-5 h-5 text-primary" fill="currentColor" />
-            <h2 className="text-lg font-semibold text-white">Liked Songs</h2>
-            <span className="text-xs text-white/30 ml-1">{likedSongs.length}</span>
-          </div>
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
-          >
-            {likedSongs.slice(0, 6).map((song) => (
-              <SongCard key={song.id} song={song} allSongs={likedSongs} />
-            ))}
-          </motion.div>
-        </section>
-      )}
-
-      {/* Trending */}
+    <div className="p-8 pb-40 overflow-y-auto h-full space-y-16">
+      
+      {/* 1. For You Section */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp className="w-5 h-5 text-primary" />
-          <h2 className="text-lg font-semibold text-white">Trending Now</h2>
-        </div>
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4"
-        >
-          {FEATURED_SONGS.map((song) => (
-            <SongCard key={song.id} song={song} allSongs={ALL_SONGS} />
-          ))}
-        </motion.div>
+        <h2 className="text-3xl font-black tracking-tight text-white mb-6 drop-shadow-md">For You</h2>
+        
+        {/* Recently Played */}
+        {recentSongs.length > 0 && (
+          <div className="mb-10">
+            <div className="flex items-center gap-3 mb-4 px-2">
+              <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400">
+                <History className="w-5 h-5" />
+              </div>
+              <h3 className="text-xl font-bold tracking-tight text-white/90">Jump Back In</h3>
+            </div>
+            <div className="flex space-x-4 overflow-x-auto pb-4 scrollbar-hide snap-x px-2">
+              {recentSongs.slice(0, 10).map((song, i) => (
+                <div key={song.id} className="snap-start">
+                    <HorizontalRecentCard song={song} songs={recentSongs} index={i} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Liked Songs Quick Access */}
+        <StaticSongRow 
+          title="From Your Liked" 
+          songs={likedSongs.slice(0, 15)} 
+          icon={<Heart className="w-5 h-5" fill="currentColor" />} 
+          iconBgColor="bg-rose-500/10" 
+          iconTextColor="text-rose-400" 
+        />
+        
+        <LazySongRow 
+          title="Based on your taste" 
+          query="new indian hits 2024" 
+        />
       </section>
 
-      {/* Hindi */}
+      {/* 2. Language Section */}
       <section>
-        <div className="flex items-center gap-2 mb-4">
-          <Clock className="w-5 h-5 text-purple-400" />
-          <h2 className="text-lg font-semibold text-white">Popular in Hindi</h2>
-        </div>
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"
-        >
-          {HINDI_SONGS.map((song) => (
-            <SongCard key={song.id} song={song} allSongs={ALL_SONGS} />
-          ))}
-        </motion.div>
+        <h2 className="text-3xl font-black tracking-tight text-white mb-6 drop-shadow-md">Regional</h2>
+        <StaticSongRow title="Hindi Hits" songs={HINDI_HITS} icon={<TrendingUp className="w-5 h-5" />} iconBgColor="bg-rose-500/10" iconTextColor="text-rose-500" />
+        <StaticSongRow title="Punjabi Vibes" songs={PUNJABI_VIBES} icon={<Flame className="w-5 h-5" />} iconBgColor="bg-orange-500/10" iconTextColor="text-orange-500" />
+        <StaticSongRow title="Bhojpuri Beats" songs={BHOJPURI_BEATS} icon={<PartyPopper className="w-5 h-5" />} iconBgColor="bg-green-500/10" iconTextColor="text-green-500" />
+        <StaticSongRow title="South Mix" songs={SOUTH_MIX} icon={<Music2 className="w-5 h-5" />} iconBgColor="bg-blue-500/10" iconTextColor="text-blue-500" />
       </section>
+
+      {/* 3. Mood Section */}
+      <section>
+        <h2 className="text-3xl font-black tracking-tight text-white mb-6 drop-shadow-md">Moods & Activities</h2>
+        <LazySongRow title="Romantic Hits" query="Hindi romantic songs" icon={<Heart className="w-5 h-5" />} iconBgColor="bg-pink-500/10" iconTextColor="text-pink-400" />
+        <LazySongRow title="Heartbreak & Sad" query="Sad hindi songs" />
+        <LazySongRow title="Party Anthems" query="Bollywood party songs" />
+        <LazySongRow title="Chill & Lo-Fi" query="Indian lofi chill tracks" />
+        <LazySongRow title="Gym & Workout" query="Punjabi workout gym songs" />
+      </section>
+
+      {/* 4. Trending Section */}
+      <section>
+        <h2 className="text-3xl font-black tracking-tight text-white mb-6 drop-shadow-md">Trending</h2>
+        <LazySongRow title="Top Indian Songs" query="Top 10 Indian songs this week" icon={<TrendingUp className="w-5 h-5" />} iconBgColor="bg-primary/10" iconTextColor="text-primary" />
+        <LazySongRow title="Viral on Reels" query="Viral indian reels songs" />
+      </section>
+
+      {/* 5. Mix Section */}
+      <section>
+        <h2 className="text-3xl font-black tracking-tight text-white mb-6 drop-shadow-md">Mixes for You</h2>
+        <LazySongRow title="Arijit Singh Mix" query="Arijit Singh Best Songs" icon={<Disc3 className="w-5 h-5" />} iconBgColor="bg-purple-500/10" iconTextColor="text-purple-400" />
+        <LazySongRow title="Diljit Dosanjh Flow" query="Diljit Dosanjh top hits" />
+        <LazySongRow title="Early 2000s Nostalgia" query="2000s Bollywood Hit Songs" />
+      </section>
+
     </div>
   );
 }

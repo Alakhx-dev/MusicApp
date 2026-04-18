@@ -5,7 +5,7 @@
   --color-surface: rgba(255, 255, 255, 0.03);
   --color-surface-hover: rgba(255, 255, 255, 0.06);
   --color-primary: #E11D48;
-  --color-primary-glow: rgba(225, 29, 72, 0.5);
+  --color-primary-glow: rgba(225, 29, 72, 0.6);
   --font-sans: 'Inter', sans-serif;
 }
 
@@ -20,43 +20,82 @@
   }
 
   ::selection {
-    background-color: rgba(225, 29, 72, 0.3);
+    background-color: rgba(225, 29, 72, 0.4);
+    color: white;
   }
 }
 
 @layer utilities {
   .glass-panel {
-    background: rgba(255, 255, 255, 0.03);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.04) 0%, rgba(255, 255, 255, 0.01) 100%);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
     border-radius: 1rem;
+  }
+
+  .premium-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.03);
+    border-radius: 1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .premium-card:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
   }
 
   .glass-button {
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(4px);
+    backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 9999px;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
   }
 
   .glass-button:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(255, 255, 255, 0.05);
   }
 
   .glass-button:active {
     background: rgba(255, 255, 255, 0.05);
+    transform: scale(0.96);
   }
 
   .neon-text {
-    text-shadow: 0 0 10px rgba(225, 29, 72, 0.5);
+    text-shadow: 0 0 15px rgba(225, 29, 72, 0.6);
   }
 
   .shadow-neon {
-    box-shadow: 0 0 15px rgba(225, 29, 72, 0.5);
+    box-shadow: 0 0 20px rgba(225, 29, 72, 0.5);
+  }
+  
+  .vignette {
+    box-shadow: inset 0 0 150px rgba(0, 0, 0, 0.9);
+  }
+
+  /* Animations for particles */
+  @keyframes floatUp {
+    0% { transform: translateY(100vh) scale(0); opacity: 0; }
+    20% { opacity: 0.8; transform: translateY(80vh) scale(1); }
+    80% { opacity: 0.8; transform: translateY(20vh) scale(1); }
+    100% { transform: translateY(0vh) scale(0); opacity: 0; }
+  }
+
+  .particle {
+    position: absolute;
+    border-radius: 50%;
+    background: white;
+    filter: blur(1px);
+    animation: floatUp infinite linear;
+    pointer-events: none;
   }
 }
 

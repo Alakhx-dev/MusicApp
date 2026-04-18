@@ -11,11 +11,19 @@ const INVIDIOUS_INSTANCES = [
 // ─── Search Query Enhancement ────────────────────────
 function enhanceQuery(query: string): string {
   const q = query.toLowerCase().trim();
-  // Don't double-append if user already typed these
-  if (q.includes('official') || q.includes('music video') || q.includes('full song')) {
-    return query;
+  
+  // If user explicitly searched for english context, don't append hindi.
+  if (q.includes('english') || q.includes('pop') || q.includes('hollywood') || q.includes('lofi')) {
+    return `${query} official audio`;
   }
-  return `${query} official music video`;
+  
+  // Don't double-append if user already typed these
+  if (q.includes('hindi') || q.includes('punjabi') || q.includes('tamil') || q.includes('telugu') || q.includes('song')) {
+    return `${query} official music video`;
+  }
+  
+  // Automatically force it to be an Indian song
+  return `${query} hindi song official music video`;
 }
 
 // ─── Exclusion Keywords ──────────────────────────────
@@ -48,16 +56,30 @@ function scoreResult(title: string, channel: string, query: string): number {
   else if (t.includes('official audio')) score += 6;
   else if (t.includes('official')) score += 5;
 
-  // ── Channel quality ──
-  if (c.includes('vevo')) score += 6;
-  if (c.includes('records') || c.includes('music') || c.includes('entertainment')) score += 3;
-  if (c.includes('t-series')) score += 4;
-  if (c.includes('yrf') || c.includes('zee music') || c.includes('sony music')) score += 4;
-  if (c.includes('tips official') || c.includes('saregama')) score += 4;
+  // ── Indian Label & Channel supremacy ──
+  if (c.includes('t-series')) score += 20;
+  if (c.includes('zee music')) score += 18;
+  if (c.includes('sony music india')) score += 18;
+  if (c.includes('saregama') || c.includes('tips official')) score += 15;
+  if (c.includes('speed records') || c.includes('desh')) score += 15;
+  if (c.includes('vevo')) score += 6; // standard global bump
+
+  // ── Indian Keywords ──
+  if (t.includes('hindi') || t.includes('punjabi') || t.includes('bhojpuri') || t.includes('tamil') || t.includes('telugu')) {
+    score += 10;
+  }
+  
+  // ── English Penalty (unless specified) ──
+  // If the query didn't specifically ask for english, penalize english generic titles that lack indian artists
+  if (!query.toLowerCase().includes('english')) {
+    if (t.match(/^[a-zA-Z0-9\s.,!?]+$/) && !c.match(/t-series|zee|sony|saregama/i)) {
+      score -= 15; // heavy penalty for generic non-indian sounding videos
+    }
+  }
 
   // ── Title contains "song" or "video" ──
-  if (t.includes('full song') || t.includes('full video')) score += 3;
-  if (t.includes('song') && !t.includes('full album')) score += 2;
+  if (t.includes('full song') || t.includes('full video')) score += 5;
+  if (t.includes('song') && !t.includes('full album')) score += 3;
   if (t.includes('lyric') || t.includes('lyrics')) score += 2;
 
   // ── Artist/query match ──
@@ -80,9 +102,10 @@ export function isOfficialResult(title: string, channel: string): boolean {
     c.includes('t-series') ||
     c.includes('yrf') ||
     c.includes('zee music') ||
-    c.includes('sony music') ||
+    c.includes('sony music india') ||
     c.includes('tips official') ||
     c.includes('saregama') ||
+    c.includes('speed records') ||
     c.includes('records')
   );
 }

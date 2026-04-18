@@ -219,22 +219,21 @@ export default function SearchPage() {
 
   const debouncedSearch = useDebounce(performSearch, 300);
 
-  const handleInput = (value: string) => {
-    setSearchQuery(value);
-    if (!value.trim()) {
+  // Watch global searchQuery changes
+  useEffect(() => {
+    if (!searchQuery.trim()) {
       setSearchResults([]);
       setAiSuggestion('');
       setIsSearching(false);
     } else {
       setIsSearching(true);
-      debouncedSearch(value);
+      debouncedSearch(searchQuery);
     }
-  };
+  }, [searchQuery, debouncedSearch, setSearchResults, setIsSearching, setAiSuggestion]);
 
   const handleClear = () => {
     clearSearch();
     setAiSuggestion('');
-    inputRef.current?.focus();
   };
 
   const handlePlaySong = (song: Song) => {
@@ -253,26 +252,14 @@ export default function SearchPage() {
   };
 
   return (
-    <div className="p-6 pb-28 overflow-y-auto h-full">
-      {/* Search Bar */}
-      <div className="relative max-w-2xl mx-auto mb-6">
-        <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-white/30" />
-        <input
-          ref={inputRef}
-          type="text"
-          placeholder="What do you want to listen to?"
-          value={searchQuery}
-          onChange={(e) => handleInput(e.target.value)}
-          className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-12 text-white placeholder:text-white/25 focus:outline-none focus:border-primary/40 focus:bg-white/[0.07] transition-all text-base"
-        />
-        {searchQuery && (
-          <button
-            onClick={handleClear}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-white/60 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        )}
+    <div className="p-6 pb-32 overflow-y-auto h-full w-full max-w-4xl mx-auto flex flex-col items-center">
+      
+      {/* Search Header for visual feedback since input is in topbar */}
+      <div className="mb-8 text-center w-full">
+        <h1 className="text-3xl font-bold text-white tracking-tight mb-2">Search Results</h1>
+        <p className="text-sm text-white/50">
+          {searchQuery ? `Showing results for "${searchQuery}"` : "Type in the top bar to find songs"}
+        </p>
       </div>
 
       {/* AI Spelling Correction */}
@@ -286,7 +273,7 @@ export default function SearchPage() {
           >
             <Sparkles className="w-4 h-4 text-purple-400 flex-shrink-0" />
             <span className="text-white/40">
-              Showing results for <button onClick={() => handleInput(aiSuggestion)} className="text-white font-medium hover:text-primary transition-colors">"{aiSuggestion}"</button>
+              Showing results for <button onClick={() => setSearchQuery(aiSuggestion)} className="text-white font-medium hover:text-primary transition-colors">"{aiSuggestion}"</button>
             </span>
           </motion.div>
         )}
