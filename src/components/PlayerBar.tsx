@@ -8,9 +8,6 @@ import { usePlayerStore } from '@/store/playerStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { likeSong, unlikeSong, isSongLiked, trackRecentlyPlayed } from '@/services/musicData';
 import { cn } from '@/lib/utils';
-import FullscreenPlayer from './FullscreenPlayer';
-import { Maximize2 } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
 
 function formatTime(seconds: number): string {
   if (!seconds || isNaN(seconds)) return '0:00';
@@ -42,7 +39,6 @@ export default function PlayerBar({ onSeek }: PlayerBarProps) {
   const { user, isGuest } = useAuth();
   const userId = isGuest ? null : user?.id || null;
   const [liked, setLiked] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const volumeRef = useRef<HTMLDivElement>(null);
 
@@ -88,16 +84,12 @@ export default function PlayerBar({ onSeek }: PlayerBarProps) {
   const VolumeIcon = isMuted || volume === 0 ? VolumeX : volume < 50 ? Volume1 : Volume2;
 
   return (
-    <>
-      <AnimatePresence>
-        {isFullscreen && <FullscreenPlayer onClose={() => setIsFullscreen(false)} />}
-      </AnimatePresence>
-      <motion.div
-        initial={{ y: 150 }}
-        animate={{ y: 0 }}
-        transition={{ type: "spring", stiffness: 200, damping: 25 }}
-        className="fixed bottom-0 left-0 right-0 z-50 p-4"
-      >
+    <motion.div
+      initial={{ y: 150 }}
+      animate={{ y: 0 }}
+      transition={{ type: "spring", stiffness: 200, damping: 25 }}
+      className="fixed bottom-0 left-0 right-0 z-50 p-4"
+    >
       <div className="max-w-screen-2xl mx-auto rounded-2xl bg-[#111]/80 backdrop-blur-2xl border border-white/5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] px-4 py-3 flex items-center justify-between">
         
         {/* Left: Song Info */}
@@ -221,15 +213,8 @@ export default function PlayerBar({ onSeek }: PlayerBarProps) {
               />
             </div>
           </div>
-          <button 
-            onClick={() => setIsFullscreen(true)}
-            className="text-white/40 hover:text-white transition-colors ml-4 hidden sm:block"
-          >
-            <Maximize2 className="w-5 h-5" />
-          </button>
         </div>
       </div>
     </motion.div>
-    </>
   );
 }
