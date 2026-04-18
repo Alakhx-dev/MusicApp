@@ -1,4 +1,19 @@
-# Logs
+# ─── Dependencies ─────────────────────────
+node_modules
+
+# ─── Build Output ─────────────────────────
+dist
+dist-ssr
+build
+
+# ─── Environment Variables (SENSITIVE) ────
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+
+# ─── Logs ─────────────────────────────────
 logs
 *.log
 npm-debug.log*
@@ -7,18 +22,21 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# ─── Editor / IDE ─────────────────────────
+.vscode
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# ─── OS Files ─────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# ─── Local / Temp ─────────────────────────
+*.local
+.cache
+.temp
