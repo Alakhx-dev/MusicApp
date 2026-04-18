@@ -1,10 +1,10 @@
-import { motion, type Variants } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Play } from 'lucide-react';
 import { usePlayerStore, type Song } from '@/store/playerStore';
 
-const item: Variants = {
+const item = {
   hidden: { opacity: 0, y: 30 },
-  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } },
+  show: { opacity: 1, y: 0, transition: { type: "spring" as const, stiffness: 300, damping: 24 } },
 };
 
 export default function PremiumSongCard({ song, allSongs }: { song: Song; allSongs: Song[] }) {

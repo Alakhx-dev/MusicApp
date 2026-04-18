@@ -1,7 +1,7 @@
 import { NavLink } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
-  Home, Search, Heart, ListMusic, Users, Radio, MessageSquare, Sparkles, LogOut, Eye
+  Home, Search, Heart, ListMusic, Users, Radio, MessageSquare, Sparkles, Eye
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
