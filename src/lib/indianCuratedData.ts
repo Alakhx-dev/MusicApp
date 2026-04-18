@@ -72,3 +72,34 @@ export const SOUTH_MIX: Song[] = [
 ];
 
 export const ALL_INDIAN_SONGS = [...HINDI_HITS, ...PUNJABI_VIBES, ...BHOJPURI_BEATS, ...SOUTH_MIX];
+
+export const REGIONAL_PLAYLISTS: Record<string, { title: string, subtitle: string, color: string, songs: Song[], image: string }> = {
+  'hindi': {
+    title: 'Hindi Hits',
+    subtitle: 'Top Bollywood and Pop hits',
+    color: 'from-rose-600 to-rose-900',
+    songs: HINDI_HITS,
+    image: HINDI_HITS[0]?.thumbnail || ''
+  },
+  'punjabi': {
+    title: 'Punjabi Vibes',
+    subtitle: 'High octane Punjabi anthems',
+    color: 'from-orange-500 to-orange-800',
+    songs: PUNJABI_VIBES,
+    image: PUNJABI_VIBES[0]?.thumbnail || ''
+  },
+  'bhojpuri': {
+    title: 'Bhojpuri Beats',
+    subtitle: 'Chart-topping Bhojpuri bangers',
+    color: 'from-green-500 to-emerald-900',
+    songs: BHOJPURI_BEATS,
+    image: BHOJPURI_BEATS[0]?.thumbnail || ''
+  },
+  'south': {
+    title: 'South Mix',
+    subtitle: 'The best of Tamil and Telugu',
+    color: 'from-blue-500 to-indigo-900',
+    songs: SOUTH_MIX,
+    image: SOUTH_MIX[0]?.thumbnail || ''
+  }
+};

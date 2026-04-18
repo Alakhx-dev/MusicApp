@@ -4,9 +4,11 @@ import { Play, TrendingUp, Heart, History, Flame, Music2, PartyPopper, Disc3, Sp
 import { usePlayerStore, type Song } from '@/store/playerStore';
 import { useAuth } from '@/contexts/AuthContext';
 import { getLikedSongs, getRecentlyPlayed } from '@/services/musicData';
-import { HINDI_HITS, PUNJABI_VIBES, BHOJPURI_BEATS, SOUTH_MIX } from '@/lib/indianCuratedData';
+import { REGIONAL_PLAYLISTS } from '@/lib/indianCuratedData';
 import PremiumSongCard from '@/components/PremiumSongCard';
 import LazySongRow from '@/components/LazySongRow';
+import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 const container = {
   hidden: { opacity: 0 },
@@ -127,11 +129,28 @@ export default function Home() {
 
       {/* 2. Language Section */}
       <section>
-        <h2 className="text-3xl font-black tracking-tight text-white mb-6 drop-shadow-md">Regional</h2>
-        <StaticSongRow title="Hindi Hits" songs={HINDI_HITS} icon={<TrendingUp className="w-5 h-5" />} iconBgColor="bg-rose-500/10" iconTextColor="text-rose-500" />
-        <StaticSongRow title="Punjabi Vibes" songs={PUNJABI_VIBES} icon={<Flame className="w-5 h-5" />} iconBgColor="bg-orange-500/10" iconTextColor="text-orange-500" />
-        <StaticSongRow title="Bhojpuri Beats" songs={BHOJPURI_BEATS} icon={<PartyPopper className="w-5 h-5" />} iconBgColor="bg-green-500/10" iconTextColor="text-green-500" />
-        <StaticSongRow title="South Mix" songs={SOUTH_MIX} icon={<Music2 className="w-5 h-5" />} iconBgColor="bg-blue-500/10" iconTextColor="text-blue-500" />
+        <h2 className="text-3xl font-black tracking-tight text-white mb-6 drop-shadow-md">Regional Playlists</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-2">
+          {Object.entries(REGIONAL_PLAYLISTS).map(([id, data]) => (
+            <Link 
+              key={id} 
+              to={`/playlist/${id}`}
+              className={cn(
+                "group relative overflow-hidden rounded-xl aspect-[4/3] flex flex-col justify-end p-4 transition-transform hover:scale-[1.03] active:scale-95 shadow-lg",
+                `bg-gradient-to-br ${data.color}`
+              )}
+            >
+              <div className="absolute right-[-15%] bottom-[-15%] w-3/5 aspect-square rotate-12 shadow-2xl transition-transform group-hover:rotate-[20deg] group-hover:scale-110 opacity-90">
+                <img src={data.image} className="w-full h-full object-cover rounded-md" alt={data.title} />
+              </div>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+              <div className="relative z-10 w-[70%]">
+                <h3 className="text-2xl font-black text-white leading-tight drop-shadow-lg mb-1">{data.title}</h3>
+                <p className="text-xs font-semibold text-white/70 line-clamp-2">{data.subtitle}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </section>
 
       {/* 3. Mood Section */}

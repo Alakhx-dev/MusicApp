@@ -9,6 +9,7 @@ import Home from '@/pages/Home';
 import SearchPage from '@/pages/Search';
 import LikedSongs from '@/pages/LikedSongs';
 import Playlists from '@/pages/Playlists';
+import RegionalPlaylist from '@/pages/RegionalPlaylist';
 import Friends from '@/pages/Friends';
 import Rooms from '@/pages/Rooms';
 import Chat from '@/pages/Chat';
@@ -91,6 +92,7 @@ function AppRoutes() {
                     <Route path="/search" element={<SearchPage />} />
                     <Route path="/liked" element={<LikedSongs />} />
                     <Route path="/playlists" element={<Playlists />} />
+                    <Route path="/playlist/:id" element={<RegionalPlaylist />} />
                     <Route path="/friends" element={<Friends />} />
                     <Route path="/rooms" element={<Rooms />} />
                     <Route path="/room/:id" element={<Rooms />} />
